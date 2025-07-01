@@ -1,0 +1,26 @@
+version: '2'
+
+services:
+
+  satellite:
+    image: docker-registry.teleserver.com.ar/browxy_satellite:latest
+    env_file:
+      - .env.dev
+    container_name: satellite
+    hostname: satellite
+    networks:
+      - install_browxy
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    volumes:
+      - /var/compiler/satellite:/var/satellite
+    ulimits:
+      nproc: 524288
+      nofile: 524288
+
+networks:
+  install_browxy:
+    external: true
+
+

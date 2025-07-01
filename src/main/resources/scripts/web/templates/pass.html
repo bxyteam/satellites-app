@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <meta NAME="Robots" content="Index,Follow">
+    <meta name="revisit-after" content="1 days">
+    <meta name="abstract" content="http://www.amsat.org.ar/pass.htm Amateur Satellite Tracking online application">
+    <meta name="KEYWORDS"
+        content="LU7ABF,Pedro Converso,Tracking,Predictions,Amateur,Satelites,Oscar,sat.htm,Online Tracking,AMSAT Argentina,AMSAT-LU,AMSAT,Argentina,Amateur Satellites,satelites,Amateur Radio,Space,LUSAT,LUSAT-1,VOXSAT,LUSAC,Telemetry,Telemetria,CW,SSB,Arrow antenna,ARISS,ISS,FO-29,SO-50,AO-16,AO-27,AO-10,UO-11,IO-86,NO-84,AO-73,EO-79,EO-80">
+    <meta name="COPYRIGHT"
+        content="Copyright 1985-2018 , LU7ABF, Pedro Converso Amsat Argentina on amsat.org.ar www.amsat.org.ar All rights Reserved. Todos los derechos Reservados">
+    <meta name="DESCRIPTION" content="Amateur Satellite Tracking Online and Offline Application by LU7ABF">
+    <meta http-equiv="Expires" content="0">
+    <meta name="google" content="notranslate">
+    <title>Sat Passes</title>
+    
+    <style>
+       .spinner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgb(23, 36, 71);
+            display: flex; 
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 100px;
+            height: 100px;
+            border: 8px solid #ccc;
+            border-top-color: #0ac587; 
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+    
+    <link rel="stylesheet" type="text/css"
+        href="https://cdn.jsdelivr.net/gh/elPoeta/browxy-assets@main/amsat/dist/orb.css">
+
+    <style media="print">
+        @media print {
+
+            html,
+            body {
+                height: 100%;
+                margin-left: 20px !important;
+                margin-top: 0 !important;
+                padding: 0 !important;
+                overflow: hidden;
+            }
+        }
+    </style>
+
+<script>
+// ### COMENTARIO ###
+    
+//     async function loadAlljson() {
+//        try {
+//           const response = await fetch("https://raw.githubusercontent.com/elPoeta/browxy-assets/refs/heads/main/amsat/dist/all.json");
+//           const data = await response.json();
+//           return data;  
+//        } catch (error) {
+//            return [[]];
+//        } 
+//   }
+ window.HOST_URL = `${new URL(window.parent.window.location.href).origin}`; 
+ const readAsset = async ({ assetOutputType, assetUrl }) => {
+        try {
+            return await window.parent.window.readAssetFile({ assetOutputType, assetUrl });
+        } catch (error) {
+            return { statusCode: 400, data: [[]], error: "Something went wrong." };
+        }
+    };
+  const loadAlljson = async () => {
+    try {
+      console.log(HOST_URL);
+      const browxySite = undefined;
+        //HOST_URL === "https://www.dev.browxy.com" ||
+        //HOST_URL === "https://www.browxy.com";
+
+      const assetUrl = browxySite
+        ? `/customHtmlUrl?projectCompositeId=${window.parent.window.projectId}&hash=123&dwrSessionId=null&customFile=assets/all.json&isSharedCustomPage=true`
+        : `/api/v1/getAsset?file=${encodeURIComponent("share/assets/all.json")}`;
+
+      let serverResponse;
+
+      if (browxySite) {
+        const assetUrlResp = await readAsset({
+          assetOutputType: "txt",
+          assetUrl: assetUrl,
+        });
+        console.log('assetUrlResp',assetUrlResp);
+        if (assetUrlResp.statusCode !== 200) {
+          console.error(assetUrlResp.error);
+          return [[]];
+        }
+
+        const response = await readAsset({
+          assetOutputType: "json",
+          assetUrl: assetUrlResp.data,
+        });
+       console.log('response',response);
+        if (response.statusCode !== 200) {
+          console.error(response.error);
+          return [[]];
+        }
+        serverResponse = response.data;
+      } else {
+        const response = await readAsset({
+          assetOutputType: "json",
+          assetUrl,
+        });
+        serverResponse = response.data;
+      }
+      return serverResponse;
+    } catch (error) {
+      console.error(error);
+      return [[]];   
+    } 
+  };
+  const openInNewTab = (event, sat) => {
+     event.preventDefault();
+     const a = document.createElement('a');
+     a.href = `${window.HOST_URL}/pass?template=share/assets/${sat}.html`;
+     a.target = '_blank';
+     a.rel = 'noopener noreferrer';
+     a.click();
+     a.remove();
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/gh/elPoeta/browxy-assets@main/amsat/dist/predictlib1.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/elPoeta/browxy-assets@main/amsat/dist/freq.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/elPoeta/browxy-assets@main/amsat/dist/assetsSrc.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/elPoeta/browxy-assets@main/amsat/dist/orbz.min.js"></script> 
+
+<!-- <script src="https://cdn.jsdelivr.net/gh/elPoeta/browxy-assets@main/amsat/dist/predictlib1.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/elPoeta/browxy-assets@main/amsat/dist/freq.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/elPoeta/browxy-assets@main/amsat/dist/all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/elPoeta/browxy-assets@main/amsat/dist/assetsSrc.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/elPoeta/browxy-assets@main/amsat/dist/orbRefactor.min.js"></script> -->
+
+
+    <script>function modprint() { sUsrAg = navigator.userAgent; if (sUsrAg.indexOf("Firefox") > -1) { document.getElementById("tablesat").style.left = "536px" } } </script>
+</head>
+
+<body onload="modprint(); load();"
+    style="background-color: #172447; margin-top: 0px; margin-left: 0px; overflow-x: hidden;">
+    <div id="spinner-overlay" class="spinner-overlay">
+      <div class="spinner"></div>
+    </div>
+    <a href="#top" id="A1"></a>
+    <noscript><span
+            style="font-size:22px;font-family:arial;font-weight:bold;color:#00ffff;"><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Allow
+            Javascript to use PASS<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;then you
+            will see satellite Passes</span></noscript>
+    <div id="map" class="noprint" style="width: 540px; height: 270px;"></div>
+    <div class="noprint" id="trayecto"
+        style="width: 540px; height: 270px; position:absolute;left:0px;top:0px;z-index: 1;"></div>
+    <div id="daynight" class="transparent_class"
+        style="width: 540px; height: 270px; position:absolute;left:0px;top:0px;z-index: -1;"></div>
+    <div id="passes" style="position:relative;left:0px;z-index: -1;width:540px;"></div>
+    <div id="linkeos" style="position:absolute;left:-2px;top:292px;width:536px;padding:0;border:0;"></div>
+    <div class="noprint" id="donate"
+        style="position:absolute;top:0px;left:0px;width:54px;height:16px;cursor:pointer;z-index:1;"
+        title="If you appreciate the information provided by this AMSAT site ,please consider make a PayPal donation to support. Thank you!">
+        <img src="https://i.postimg.cc/Cx74pHrt/donate.gif" style="border:0; width:54px; height:16px;"
+            alt=" If you appreciate the information provided by this AMSAT site, please consider make a PayPal donation to support. Thank you!"
+            onclick="javascript:donate();">
+    </div>
+    <div class="noprint" id="Sunpos" title="Sun"
+        style="position:absolute; width: 16px; height: 16px; top:280px; left: 522px;z-index: 1;cursor: pointer;">
+        <img id="Sun" src="https://i.postimg.cc/5Ny6P5dp/sun1.gif" alt="Sun" title="Sun"
+            style="width:16px;height:16px;cursor:pointer;border:0px;" onclick="graficarsuncoverage();">
+    </div>
+    <div class="noprint" id="rotorimg" title="Rotor enable/disable" onclick="rotorimage();"
+        style="position:absolute; width: 22px; height: 22px; top:272px; left: 450px; cursor:pointer;visibility:hidden;border:0px;">
+        <img id="rimg" src="https://i.postimg.cc/5tj8dcCY/rotoron.gif" alt="Rotor enable/disable"
+            title="Rotor enable/disable">
+    </div>
+    <div class="noprint" id="birdimg" title="Show/Hide Satellites Images" onclick="birdimage();"
+        style="position:absolute; width: 22px; height: 22px; top:272px; left: 499px; cursor:pointer;"><img id="bimg"
+            src="https://i.postimg.cc/nLV0XwQp/birdon.gif" alt="Show/Hide Satellites Images"
+            title="Show/Hide Satellites Images" style="width:22px; height:22px; border:0px;"></div>
+    <div class="noprint" id="hhmm" title=" Hour:Minutes for AOS or -Minutes left for this pass"
+        onclick="javascript:alert(' * This Column Shows *\n Hour:Minutes for AOS or\n-Minutes left for this pass');"
+        style="position:absolute; width: 42px; height: 22px; top:272px; left: 2px; cursor:help;"></div>
+    <div class="noprint" id="speaker" title="Beep Mute" onclick="speak();"
+        style="position:absolute; width: 22px; height: 22px; top:272px; left: 522px; cursor:pointer;"><img id="spk"
+            src="https://i.postimg.cc/L5Ch95fz/speakeron.gif" alt="Beep Mute" title="Beep Mute"
+            style="width:22px; height:22px; border:0px;"></div>
+    <div class="noprint" id="aziley" title="  AZIMUTHS  AOS,TCA,LOS"
+        style="position:absolute; width: 42px; height: 22px; top:272px; left:430px; cursor:help;"></div>
+    <div class="noprint" id="changedate" title="change date"
+        style="position:absolute; width: 22px; height: 22px; top:244px; left: 211px; cursor:pointer;">
+        <form name='tstest' method='post' style='margin-bottom:0;margin-top:0;'>
+            <input type='Text' style='visibility:hidden' name='timestamp' id='timestamp' value=''>
+            <a href="javascript:show_calendar('document.tstest.timestamp', document.tstest.timestamp.value);">
+                <img id='cal' src='https://i.postimg.cc/gk9sV06M/cal.gif' style="width:16px; height:24px; border:0px;"
+                    alt='Click Here to Pick up the timestamp'>
+            </a>
+        </form>
+    </div>
+    <div class="noprint" id="hora"
+        style="position:absolute;top:0px;left:52px;width:277px;font-size:13px;line-height:15px;font-family:Tahoma,Arial;font-weight:bold;color:#ffffff;vertical-align:text-top;z-index:1;">
+        Hora Local</div>
+    <div class="noprint" id="linkos"
+        style="position:absolute;top:0px;left:325px;width:250px;font-size:14px;line-height:16px;font-family:Tahoma,Arial;font-weight:bold;color:#ffffff;vertical-align:text-top;z-index:1;">
+        <a href="#change"
+            title="Change or set new Grid Locator Insure you have right Timezone and Date/Time on your device. OK! if Home Icon at your place"><span
+                style="color:#00ffff;">Locator</span></a>&nbsp;
+        <a href="#" id="reload"
+            onclick='saveMapState();satactivity=satactivity+"RELOAD\/";if (!vbasic){location.reload();}'
+            title="Reload / Refresh and Update TLEs"><span style="color:#00ffff;">Reload</span></a>&nbsp;
+        <a href="#" onclick='event.preventDefault(); showkeps();' Title="Add/Del Satellites - See Keps in use"><span
+                style="color:#00ffff;">&plusmn;Sats</span></a>&nbsp;
+        <a href="#" title="Sats Detail" onclick="event.preventDefault(); versats(1);"><span style='color:#00ffff;'>SD</span></a>&nbsp;
+        <a href="#" title="Application Description  In several languages" onclick="event.preventDefault(); showhelp();"><span
+                style="color:#ffff00;font-weight:bold;font-family:'Arial Narrow',Tahoma">Help</span></a>&nbsp;
+    </div>
+    <div class="noprint" id="zooms"
+        style="position:absolute;top:0px;left:578px;width:262px;font-size:17px;line-height:20px;font-family:Tahoma,Arial;font-weight:normal;color:#ffffff;vertical-align:text-top;z-index:6;white-space:nowrap;">
+        &nbsp;
+        
+        <a href="#" title="Zoom x 1" class="xz" id="z1" onclick="event.preventDefault();setzoom(1);"
+            style="font-size:11px;">1</a>&nbsp;<a href="#" title="Zoom x 2" class="xz" id="z1.5"
+            onclick="event.preventDefault();setzoom(1.5);" style="font-size:13px;">2</a>&nbsp;<a href="#"
+            title="Zoom x 3" class="xz" id="z2.2" onclick="event.preventDefault();setzoom(2.2);"
+            style="font-size:14px;">3</a>&nbsp;<a href="#" title="Zoom x 4" class="xz" id="z3.5"
+            onclick="event.preventDefault();setzoom(3.5);" style="font-size:15px;">4</a>&nbsp;<a href="#"
+            title="Zoom x 6" class="xz" id="z5.3" onclick="event.preventDefault();setzoom(5.3);"
+            style="font-size:16px;">6</a>&nbsp;<a href="#" title="Zoom x 8" class="xz" id="z8"
+            onclick="event.preventDefault();setzoom(8);" style="font-size:17px;">8</a>&nbsp;<a href="#"
+            title="Zoom x 16" class="xz" id="z16" onclick="event.preventDefault();setzoom(16);"
+            style="font-size:18px;">H</a>
+        <a href="#" title="Screen Size" id="sz" onclick="event.preventDefault();screensize();"
+            style="cursor:pointer;color:Aqua;font-size:19px;font-weight:bold;">&#9651;</a>
+    </div>
+    <div class="noprint" id="birds"
+        style="position:absolute;top:3px;left:738px;width:44px;font-size:16px;line-height:13px;font-family:Courier New,Tahoma,Arial;font-weight:bold;color:#ffffff;vertical-align:text-top;z-index:6;text-align:center;white-space:nowrap;">
+    </div>
+    <div class="noprint" id="birds1"
+        style="position:absolute;top:3px;left:794px;width:44px;font-size:16px;line-height:13px;font-family:Courier New,Tahoma,Arial;font-weight:bold;color:#ffffff;vertical-align:text-top;z-index:6;text-align:center;white-space:nowrap;">
+    </div>
+    <div class="noprint" id="satimage"
+        style="position:absolute;left:30px;top:298px;width:510px;z-index:-1;display:block;margin-left:auto;margin-right:auto;text-align:center;">
+    </div>
+    <div class="noprint" id="Div1"
+        style="position:absolute;top:258px;left:8px;width:532px;height:12px;font-size:12px;font-family:Tahoma,Arial;font-weight:normal;color:#000000;background-color:transparent;vertical-align:text-top;">
+        Next passes at your location
+        <script>var date = new Date(); document.write(".  Starting at " + date.toTimeString());</script>
+    </div>
+    <div class="noprint" id="AOSLOS" onclick="aoslosclick();"
+        style="position:absolute; width: 140px; height: 24px; top:130px; left: 582px; font-size:22px; font-family:Tahoma; font-weight:bold; color:#ffffff; z-index:99; text-align:center; cursor:pointer;">
+    </div>
+    <div class="noprint" id="bubble"
+        style="position:absolute;left:570px;top:42px;width:170px;height:60px;visibility:hidden;z-index:7;background-image: url(https://i.postimg.cc/PfvKvDNp/bubble.gif);font-family:Arial,Tahoma;font-size:18px;font-weight:bold;line-height:24px;">
+    </div>
+    <div class="noprint" id="printicon"
+        style="position:absolute;left:413px;top:272px;width:24px;height:21px;cursor:pointer;z-index:111;border:0px;"><a
+            href="#" onclick="javascript:printpr();"><img src="https://i.postimg.cc/T3tn42pv/printicon.gif"
+                alt="Print this Table, Click Print Preview to see results"
+                title="Print this Table, Click Print Preview to see results"></a></div>
+    <div class="noprint" id="localtime" title="click to change Local/UTC" onclick="localgmt();"
+        style="position:absolute;width:130px;height:32px;top:270px;left:249px;z-index:1;color:#00ffff;cursor:pointer;font-family:'Arial Black';font-weight:bolder;font-size:22px;line-height:22px;white-space:nowrap;">
+        |__________|</div>
+    <div class="noprint" id="elevatio" title="Show Elevations > 0 Click here to change" onclick="changeelevation();"
+        style="position:absolute;width:42px;height:32px;top:270px;left:373px;z-index:1;color:#00ffff;cursor:pointer;font-family:'Arial Black';font-weight:bolder;font-size:20px;line-height:22px;white-space:nowrap;">
+        |___|</div>
+    <a href="#" id="change"></a>
+    <form name="wwl" action="pass.htm" style="margin-bottom:0;margin-top:0;">
+        <table class="noprint" style="text-align:left; border:0px; padding:0; background-color:#C4DCB3;width:540px;">
+            <tr class=tit style="height:22px;">
+                <td colspan=2 align="center" class="tit" style="width:540px;height:22px;">
+                    Check or change your <img src="https://i.postimg.cc/nzjK78Vb/home.gif" Alt="Your Location" 
+                        style="height:18px; vertical-align:middle;z-index: 1;border:0px;">&nbsp;&nbsp;Station Grid
+                    Locator&nbsp;&nbsp;or Latitude/Longitude&nbsp;<a href="#Top">
+                        <span style="color:#00ffff;font-size:18px;font-weight:normal;" Title="GO UP"><b>&#x25B2;</b>
+                        </span>
+                    </a>&nbsp;&nbsp;
+                    <a href="#" onclick='event.preventDefault();golocator();' target="_self" title="Grid Locator Map">
+                        <span
+                            style="color:#00ffff;font-size:14px;text-decoration:underline;font-weight:bold;">Grid?</span>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td align="right" class="det1" id="mapa"></td>
+                <td class="det1" align="left" nowrap>
+                    &nbsp;<b>&nbsp;Locator:&nbsp;&nbsp;&nbsp;&nbsp;</b><input name="loc" id="loc" type="text" size="6"
+                        value="" style="text-transform: uppercase;font-weight:bold;cursor:help;width:73px;" class="det1"
+                        title=" Enter your own Grid Locator as:  2 Letters  2 numbers  2 Letters  Then click on Resolve and Set New  Click on the Mail Envelope for Help"
+                        onfocus="document.getElementById('loc').value=''"
+                        onblur="document.getElementById('loc').value=document.getElementById('loc').value.toUpperCase()">
+                    &nbsp;<input style="font-weight:bold;" type="Reset" value="Reset" class="det2" id="Button1"
+                        name="Button1" onclick="javascript:document.getElementById('mapa').innerHTML = ' �.ddd'">
+                    &nbsp;<input type="button" style="font-weight:bold;" value="Resolve and Set New"
+                        onclick="locator(this.form,'1');localat=form.lat.value;localon=form.lon.value;Orb.setHomeCoordinates(form.lat.value,form.lon.value);Orb.generateTable(document.getElementById('passes'));document.location.href='#top';saveMapState('yes');"
+                        class=det2 id="button2" name="button2">
+                    
+                </td>
+            </tr>
+            <tr>
+                <td align="center" class="det1" nowrap>&nbsp;+North&nbsp;&nbsp;<b>-</b>South =&#62;</td>
+                <td class="det1" nowrap style="text-align: left;">
+                    <b>&nbsp;Latitude:&nbsp;&nbsp;&nbsp;&nbsp;</b><input name="lat" id="lat" type="text" size="8"
+                        value="" class="det1"
+                        onfocus="document.getElementById('lat').value=''; document.getElementById('latg').value=''; document.getElementById('latm').value=''; document.getElementById('lats').value=''"><span
+                        style="font-size:18px;line-height:12px;vertical-align: text-bottom;">&deg;&nbsp;</span>
+                    &nbsp;Deg.<input name="latg" id="latg" type="number" style="width: 37px;" value=""
+                        onfocus="document.getElementById('latg').value=''" class=det1 min="-181" max="181"><span
+                        style="font-size:18px;line-height:12px;vertical-align: text-bottom;">&deg;&nbsp;</span>
+                    &nbsp;Min.<input name="latm" id="latm" type="number" style="width: 37px;" value=""
+                        onfocus="document.getElementById('latm').value=''" class=det1 min="-1" max="91"><span
+                        style="font-size:18px;vertical-align: text-bottom;">'&nbsp;</span>
+                    &nbsp;Sec.<input name="lats" id="lats" type="number" style="width: 37px;" value=""
+                        onfocus="document.getElementById('lats').value=''" class=det1 min="-1" max="91"><span
+                        style="font-size:18px;vertical-align: text-bottom;">''</span>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: center;" class="det1" nowrap>&nbsp;+East&nbsp;&nbsp;&nbsp;&nbsp;<b>-</b>West
+                    =&#62;</td>
+                <td class="det1" nowrap align="left">
+                    <b>&nbsp;Longitude:&nbsp;</b><input name="lon" id="lon" type="text" size="8" value="" class="det1"
+                        onfocus="document.getElementById('lon').value=''; document.getElementById('longi').value=''; wwl.lonm.value='';document.getElementById('lons').value=''"><span
+                        style="font-size:18px;line-height:12px;vertical-align: text-bottom;">&deg;&nbsp;</span>
+                    &nbsp;Deg.<input name="longi" id="longi" type="number" style="width: 37px;" value=""
+                        onfocus="document.getElementById('longi').value=''" class="det1" min="-181" max="181"><span
+                        style="font-size:18px;line-height:12px;vertical-align: text-bottom;">&deg;&nbsp;</span>
+                    &nbsp;Min.<input name="lonm" id="lonm" type="number" style="width: 37px;" value=""
+                        onfocus="document.getElementById('lonm').value=''" class="det1" min="-1" max="91"><span
+                        style="font-size:18px;vertical-align: text-bottom;">'&nbsp;</span>
+                    &nbsp;Sec.<input name="lons" id="lons" type="number" style="width: 37px;" value=""
+                        onfocus="document.getElementById('lons').value=''" class="det1" min="-1" max="91"><span
+                        style="font-size:18px;vertical-align: text-bottom;">''</span>
+                </td>
+            </tr>
+        </table>
+        <div id="lu7aaurl"
+            style="width:540px;color:#ffffff;visibility:visible;font-family:Courier New;font-size:15px;font-weight:bold;">
+        </div>
+        <div id="Tracking"
+            style="width:540px;color:#ffffff;visibility:hidden;font-family:Courier New;font-size:15px;font-weight:bold;">
+        </div>
+    </form>
+    <div class="noprint" id="trackingdata"
+        style="position:absolute;border:0px;background-color:#172447;top:21px;left:546px;height:60px;width:190px;color:#ffffff;font-family:Tahoma,Arial;font-size:18px;font-weight:bold;line-height:17px;z-index: 2;">
+        <center>Click <img src="https://i.postimg.cc/ZqKnX6Xw/saticon2.gif" alt="Click satellite Icon"
+                style="border:0px;width:25px;line-height:18px;"> Satellite<br>To see Az/El/Freq<br>Click <a
+                href="#change">
+                <img src="https://i.postimg.cc/nzjK78Vb/home.gif" title="Click to change Grid Locator"
+                    alt="Click to change Grid Locator" style="width:18px;height:18px;line-height:18px;border:0px;">
+            </a> to set QTH
+        </center>
+    </div>
+    <div id="Logging" style="left:0px;width:210px;visibility:hidden;"></div>
+    <div id="vbasic" style="left:0px;width:210px;visibility:hidden;">false</div>
+    <div id="tablesat" class="tableprint"
+        style="font-family:Tahoma, Arial;font-size:10pt;line-height:9pt;color:#000000; position:absolute;display: none; left:594px;top:0px;width:182px;text-align:left;">
+        <b>&nbsp;Downlinks/Uplinks&nbsp;</b><br><br>
+        <b>ARISS</b> PK:145.825 FM<br>&nbsp;Voice&nbsp;DU:145.800 FM<p>DU:437.800 FM</p>
+        <p>PK:145.99-.80</p><br>
+        <b>AO-07</b> U:145.850-950<br>Mode A D:29.400-29.5<br>
+        <p>B:29.502 CW</p>
+        <b>AO-07</b> U:432.125-175<br>Mode B D:145.975-925<p>B:145.9775 CW</p><br>
+        <b>FO-29</b> U:145.900-146<br>
+        <p>D:435.800-900</p>
+        <p>B:435.795 CW</p><br>
+        <b>JO-97</b> U:435.100-120<br>
+        <p>D:145.855-875</p>
+        <p>B:435.604 CW</p><br>
+        <b>RS-44</b>&nbsp;&nbsp;U:145.900-146<br>1K2-9K6 D:435.600-700<p>B:435.604 CW</p><br>
+        <b>SO-50</b> U:145.850 67Hz<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;D:436.795 74.4Hz<br><br>
+        <b>PO101</b>&nbsp;&nbsp;U:437.500 FM<br>141.3Hz D:145.900 FM<br>
+        <p>B:145.900 CW</p><br>
+        <b>SO121</b>&nbsp;&nbsp;U:145.875 FM<br>
+        <p>D:436.663 FM</p>
+        <p>B:436.663 CW</p><br>
+        <b>AO-73</b>&nbsp;&nbsp;U:435.160-140<br>
+        <p>D:145.950-970</p>
+        <p>B:145.935 CW</p><br>
+        <b>AO-91</b>&nbsp;&nbsp;U:435.250 67Hz<br>
+        <p>D:145.961 .4W</p><br>
+        <b>XW-2C</b> U:435.150-170<br>
+        <p>D:145.795-815</p>
+        <p>B:145.790 CW</p>
+        <p>B:145.770 AX</p><br>
+        <b>XW-2D</b> U:435.210-230<br>
+        <p>D:145.860-880</p>
+        <p>B:145.855 CW</p>
+        <p>B:145.835 AX</p><br>
+        <b>CAS4A</b> B:145.855 CW<p>B:145.835 AX</p><br>
+        <b>CAS4B</b> U:435.270-290<br>
+        <p>D:145.915-935</p>
+        <p>B:145.910 CW</p>
+        <p>B:145.890 AX</p><br>
+        <b>IO117</b> U:436.750 PKT<br>
+        <p> D:436.750 PKT</p>
+        <p>1K2/4K8 GMSK</p><br>
+        <b>EO-79</b> U:435.035-065<br>
+        <p> D:145.950-970</p>
+        <p>B:145.880 AX</p><br>
+        <b>IO-86</b> U:435.880 FM<br>
+        <p>D:145.880 FM</p>
+        <p>B:145.825 CW</p>
+        <p>B:145.825 AX</p><br>
+        -- Transmit only Sats --<br>
+        <b>NA-15</b> D:137.620 APT<br><b>NA-18</b> D:137.9125 APT<br><b>NA-19</b> D:137.100 APT
+        <br><br><i>http://amsat.org.ar/pass</i>
+    </div>
+    <div class="noprint" id="graphics" onclick="satnogs()"
+        title="This Graph Shows where  To point your Antenna Green = Above Horizont AOS &uarr; Acquis. of Signal  LOS &darr; Loss of Signal&#13; Click to Check Satnogs"
+        style="position:absolute;border:0px;background-color:#172447;left:542px;top:82px;color:#ffffff;width:200px;height:186px;line-height:18px;font-weight:bold;border:0;font-family:Arial;text-align:center;cursor:help;background-image: url('https://i.postimg.cc/cHpRBD6K/ft.gif');">
+        <img src="https://i.postimg.cc/W49Sg6Mr/arrow.jpg"
+            style="border:2px;border-color:#ffffff;width:180px;height:180px;border-radius: 6px 6px 6px 6px;"
+            title="Tracking satellites" alt="Tracking satellites"
+            onclick="javascript:document.location.href='http://lu7abf.org.ar/pass.htm'" />
+    </div>
+    <div class="noprint" id="azel" title="U: Uplink | D: Downlink | B: Beacon"
+        style="position:absolute;border:0px;top:264px;left:538px;width:210px;height:0px;line-height:21px;font-family:Tahoma,Arial;font-size:20px;text-align:left;">
+    </div>
+    <div class="noprint" id="uplinkdownlink"
+        style="color:#ffffff;font-family:Tahoma,Arial;font-size:19px;line-height:19px;position:absolute;border:0px;top:264px;left:543px;width:230px;">
+        <br style="line-height:7px;">&nbsp;<span class="box"><img class="noprint" id="click0"
+                src="https://i.postimg.cc/0QhN6Fj4/saticon5.gif" style="height:18px; width:32px;"><span id="ty0"
+                class="text" title="Show only SSB Linear Sats" onclick="selectTLE('0');">0</span></span>
+          <span id="tipo0" title="SSB Linear Sats Shown">SSB Linear Sats</span><br>
+            &nbsp;<span class="box"><img class="noprint" id="click7" alt="saticon45.gif" src="https://i.postimg.cc/hvxtVs7t/saticon45.gif"
+                    style="height:18px; width:32px;"><span id="ty7" class="text" title="Show SSB and FM Sats"
+                    onclick="selectTLE('7');">0</span></span><span id="tipo7" title="SSB & FM Sats Shown">&nbsp;SSB +
+                FM&nbsp;&nbsp;Sats</span><br>
+            &nbsp;<span class="box"><img class="noprint" id="click1" alt="saticon4.gif" src="https://i.postimg.cc/W3d31TNr/saticon4.gif"
+                    style="height:18px; width:32px;"><span id="ty1" class="text" title="Show only FM Voice Sats"
+                    onclick="selectTLE('1');">0</span></span><span id="tipo1"
+                title="Voice Sats Shown">&nbsp;FM&nbsp;&nbsp;Voice&nbsp;&nbsp;Sats</span><br>
+            &nbsp;<span class="box"><img class="noprint" id="click2" alt="saticon2.gif" src="https://i.postimg.cc/ZqKnX6Xw/saticon2.gif"
+                    style="height:18px; width:32px;"><span id="ty2" class="text" title="Show only Digital Sats"
+                    onclick="selectTLE('2');">0</span></span><span id="tipo2" title="FM Digital Sats Shown">&nbsp;FM
+                Digital Sats</span><br>
+            &nbsp;<span class="box"><img class="noprint" id="click3" alt="saticon3.gif" src="https://i.postimg.cc/CKP50zgS/saticon3.gif"
+                    style="height:18px; width:32px;"><span id="ty3" class="text" title="Show only XMT Only Sats"
+                    onclick="selectTLE('3');">0</span></span><span id="tipo3" title="XMT Only Sats Shown">&nbsp;XMT
+                Only&nbsp;&nbsp;Sats</span><br>
+            &nbsp;<span class="box"><img class="noprint" id="click4" alt="satnoa.gif" src="https://i.postimg.cc/3r6GpfzY/satnoa.gif"
+                    style="height:18px; width:32px;"><span id="ty4" class="text" title="Show only Meteo Sats"
+                    onclick="selectTLE('4');">0</span></span><span id="tipo4"
+                title="Weather Sats Shown">&nbsp;Weather&nbsp;&nbsp;&nbsp;&nbsp;Sats</span><br>
+            &nbsp;<span class="box"><img class="noprint" id="click5" alt="saticony.gif" src="https://i.postimg.cc/7PThvHQr/saticony.gif"
+                    style="height:18px; width:32px;"><span id="ty5" class="text" title="Show Selected & Default Sats"
+                    onclick="selectTLE('5');PLib.tleData.splice(0,PLib.tleData.length);loadTLE();kepschange('','')"></span></span><span
+                id="tipo5" title="In Range Sats Shown">&nbsp;In Range&nbsp;&nbsp;&nbsp;Sats</span><br>
+            <script>
+                var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+                if (navigator.appName != "Microsoft Internet Explorer" && window.navigator.userAgent.indexOf("Android") == -1) {
+                    document.write("&nbsp;<span class=\"box\"><img class='noprint' id=\"click6\" src='https://i.postimg.cc/sDL1bB3z/unknown.gif' height='18px' width='32px' onclick=\"selectTLE('6');\" height='18px' width='32px'><span id=\"ty6\" class=\"text\" title=\"Show ALL Sats Will be SLOW !\" onclick=\"selectTLE('6');\"><\/span><\/span><span id=\"tipo6\" title=\"All Sats Shown\">&nbsp;Show ALL&nbsp;&nbsp;Sats<\/span><br>")
+                }
+            </script>
+            <div class="noprint" id="frecuencias" style="width:198px;">
+                <table class="noprint" style="padding:0;border:0;width:198px;">
+                    <tr>
+                       <td class="noprint" align=left valign=top width=200px style="width:198px; line-height:15px; font-family: Tahoma, Arial;font-size:18px; color:#ffffff; font-weight:normal; vertical-align:middle;">
+                            <span class="noprint" style="font-family:Tahoma,Arial;font-size:19px;color:#ffffff;text-decoration:underline;font-weight:bold;line-height:24px;">
+                                <b>&nbsp;Downlinks/Uplinks&nbsp;</b><br>
+                            </span>
+                            <a href="#" onclick="openInNewTab(event,'satiss');"><b>ARISS</b></a>&nbsp;&nbsp;PK:145.825 FM<br>
+                              &nbsp;&nbsp;Voice&nbsp;&nbsp;DU:145.800 FM<p>DU:437.800 FM</p><p>PK:145.99-.80</p><br>
+                             <a href="#" onclick="openInNewTab(event,'satao-07a');"><b>AO-07</b></a> U:145.850-950<br>Mode A D:29.400-29.5<br><p>B:29.502 CW</p>
+                             <a href="#" onclick="openInNewTab(event,'satao-07b');"><b>AO-07</b></a> U:432.125-175<br>Mode B D:145.975-925<p>B:145.9775 CW</p><br>
+                             <a href="#" onclick="openInNewTab(event,'satfo-29');"><b>FO-29</b></a> U:145.900-146<br>USB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;D:435.800-900<p>B:435.795 CW</p><br>
+                             <a href="#" onclick="openInNewTab(event,'satjo-97');"><b>JO-97</b></a> U:435.100-120<br>USB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;D:145.855-875<p>B:435.795 CW</p><br>
+                             <a href="#" onclick="openInNewTab(event,'satao-73');"><b>AO-73</b></a> U:435.160-140<br>USB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;D:145.950-970<p>B:145.935 CW</p><br>
+                             <a href="#" onclick="openInNewTab(event,'satrs-44')"><b>RS-44</b></a> U:145.900-146<br>USB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;D:435.600-700<p>B:435.604 CW</p><br>
+                             <a href="#" onclick="openInNewTab(event,'satso-50');"><b>SO-50</b></a> U:145.850 67Hz<br>FM&nbsp;&nbsp;&nbsp;&nbsp;D:436.795 74.4Hz<br><br>
+                             <a href="#" onclick="openInNewTab(event,'satpo101');"><b>PO101</b></a>&nbsp;&nbsp;U:437.500 FM<br>141.3Hz D:145.900 FM<br><p>&nbsp;B:145.900 CW</p><br>
+                             <a href="#" onclick="openInNewTab(event,'satso-121');"><b>SO121</b></a> U:145.875 FM<br>FM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<p>D:436.663 FM</p><p>B:436.663 CW</p><br>
+                             <a href="#" onclick="openInNewTab(event,'satxw-2c');"><b>AO-91</b></a> U:435.250 67Hz<br>FM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;D:145.961 .4W<br><br>
+                             <a href="#" onclick="openInNewTab(event,'satxw-2c');"><b>XW-2C</b></a> U:435.150-170<br>USB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;D:145.795-815<p>B:145.790 CW</p><br>
+                             <a href="#" onclick="openInNewTab(event,'satxw-2d');"><b>XW-2D</b></a> U:435.210-230<br>USB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;D:145.860-880<p>B:145.855 CW</p><br>
+                             <a href="#" onclick="openInNewTab(event,'satcas4a');"><b>CAS4A</b></a> B:145.855 CW<p>B:145.835 AX</p><br>
+                             <a href="#" onclick="openInNewTab(event,'satcas4b');"><b>CAS4B</b></a> U:435.270-290<br>USB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;D:145.915-935<p>B:145.910 CW</p><p>B:145.890 AX</p><br>
+                             <a href="#" onclick="openInNewTab(event,'satio-117');"><b>IO117</b></a> U:436.750 PKT<br><p> D:436.750 PKT</p><p>1K2/4K8 GMSK</p><br>
+                             <a href="#" onclick="openInNewTab(event,'satio-86');"><b>IO-86</b></a>&nbsp;&nbsp;U:435.880 FM<br><p>D:145.880 FM</p><p>B:145.825 CW</p><p>B:145.825 AX</p><br>
+                             -- Transmit only Sats --<br>
+                             <a href="#" onclick="openInNewTab(event,'satlo19');"><b>LO-19</b></a> B:437.125 CW<br>
+                             <a href="#" onclick="openInNewTab(event,'satna15');"><b>NA-15</b></a> D:137.620 APT<br>
+                             <a href="#" onclick="openInNewTab(event,'satna18');"><b>NA-18</b></a> D:137.9125 APT<br>
+                             <a href="#" onclick="openInNewTab(event,'satna19');"><b>NA-19</b></a> D:137.100 APT
+                        </td>   
+                    </tr>  
+                </table>
+            </div>
+    </div>
+</body>
+
+</html>
+
+

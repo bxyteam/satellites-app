@@ -1,0 +1,20 @@
+FROM %%DOCKER_REGISTRY%%/browxy_compiler_base:latest
+
+# grant sudoers privileges
+RUN adduser --system --ingroup users --shell /bin/bash --home /home/satellite compiler
+RUN echo "compiler ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+RUN echo "Defaults env_keep+=DOCKER_DAEMON_ARGS" >> /etc/sudoers
+
+# create hosts file and backup
+RUN cp /etc/hosts /etc/hosts.default
+RUN chmod ugo+rw /etc/hosts.default
+RUN chmod ugo+rw /etc/hosts
+
+# install satellites application
+RUN mkdir -p /home/satellite/application
+COPY ./target/runnable /home/satellite/application
+RUN chown -R compiler:users /home/satellite/application
+RUN chmod ugo+x /home/satellite/application/*.sh
+
+# set run command
+CMD /home/satellite/application/dockerStart.sh
