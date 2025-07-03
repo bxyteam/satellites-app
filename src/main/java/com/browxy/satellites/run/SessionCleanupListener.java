@@ -23,7 +23,7 @@ public class SessionCleanupListener implements HttpSessionListener {
   public void sessionCreated(HttpSessionEvent se) {
     HttpSession session = se.getSession();
     String alias = NanoIdUtils.randomNanoId();
-    FileManager.createDirectory(Application.getInstance().getAmsatWebConfig().getBasePath()
+    FileManager.createDirectory(Application.getInstance().getSatelliteWebConfig().getBasePath()
         + File.separator + "share" + File.separator + alias);
     session.setAttribute("alias", alias);
 
@@ -43,7 +43,7 @@ public class SessionCleanupListener implements HttpSessionListener {
 
   private void deleteFolderOnSessionEnd(String alias) {
 
-    File folder = new File(Application.getInstance().getAmsatWebConfig().getBasePath()
+    File folder = new File(Application.getInstance().getSatelliteWebConfig().getBasePath()
         + File.separator + "share" + File.separator + alias);
 
     if (folder.exists() && folder.isDirectory()) {

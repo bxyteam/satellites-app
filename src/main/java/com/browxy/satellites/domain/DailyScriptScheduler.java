@@ -84,13 +84,18 @@ public class DailyScriptScheduler {
 
   private void runKepsUdaterScript() {
     String scriptKepsUpdaterFilePath =
-        Application.getInstance().getAmsatGithubConfig().getLocalRepoPath()
+        Application.getInstance().getSatelliteGithubConfig().getLocalRepoPath()
             + "/scripts/run_keps_updater.sh";
     String scriptCopyFilesFilePath =
-        Application.getInstance().getAmsatGithubConfig().getLocalRepoPath()
+        Application.getInstance().getSatelliteGithubConfig().getLocalRepoPath()
             + "/scripts/copy_files.sh";
     try {
-      executeScript(scriptKepsUpdaterFilePath);
+      String spaceTrackIdentity = System.getenv("SPACE_TRACK_IDENTITY");
+      String spaceTrackPassword = System.getenv("SPACE_TRACK_PASSWORD");
+      if(spaceTrackIdentity != null && !spaceTrackIdentity.isEmpty() 
+          && spaceTrackPassword != null && !spaceTrackPassword.isEmpty()) {
+        executeScript(scriptKepsUpdaterFilePath);
+      }
       syncGithub();
       executeScript(scriptCopyFilesFilePath);
     } catch (Exception e) {
@@ -100,7 +105,7 @@ public class DailyScriptScheduler {
 
   private void runPasosUdaterScript() {
     String scriptPasosUpdaterFilePath =
-        Application.getInstance().getAmsatGithubConfig().getLocalRepoPath()
+        Application.getInstance().getSatelliteGithubConfig().getLocalRepoPath()
             + "/scripts/run_pasos_updater.sh";
     try {
       executeScript(scriptPasosUpdaterFilePath);
@@ -111,14 +116,14 @@ public class DailyScriptScheduler {
 
   public void syncGithub() {
 
-    if (Application.getInstance().getAmsatGithubConfig().getGithubToken() == null
-        || Application.getInstance().getAmsatGithubConfig().getGithubToken().isEmpty()) {
+    if (Application.getInstance().getSatelliteGithubConfig().getGithubToken() == null
+        || Application.getInstance().getSatelliteGithubConfig().getGithubToken().isEmpty()) {
       logger.error("Please set GITHUB_TOKEN environment variable");
       return;
     }
 
     GitHubBranchSyncChecker checker =
-        new GitHubBranchSyncChecker(Application.getInstance().getAmsatGithubConfig());
+        new GitHubBranchSyncChecker(Application.getInstance().getSatelliteGithubConfig());
 
     checker.checkAndSync();
 

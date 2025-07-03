@@ -7,13 +7,18 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.browxy.satellites.domain.Application;
 
 public class GithubRepoDownloader {
   private static Logger logger = LoggerFactory.getLogger(GithubRepoDownloader.class);
   
   public void download() throws IOException, InterruptedException  {
     
-    //"export GITHUB_DOWNLOAD_URL=\"https://github.com/bxyteam/satellite-test/archive/refs/heads/main.zip\"\n" +
+    if (Application.getInstance().getSatelliteGithubConfig().getDownloadUrl() == null
+        || Application.getInstance().getSatelliteGithubConfig().getDownloadUrl().isEmpty()) {
+      return;
+    }
+    
     String script = 
         "set -e\n" +
         "TMP_DIR=\"/var/compiler/satellite/data/tmp\"\n" +

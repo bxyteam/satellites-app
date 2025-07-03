@@ -32,8 +32,8 @@ public class FileReaderServlet extends HttpServlet {
 
       String path = request.getParameter("path");
       String fullPath = path == null || path.trim().isEmpty()
-          ? Application.getInstance().getAmsatWebConfig().getBasePath() + File.separator + file
-          : Application.getInstance().getAmsatWebConfig().getBasePath() + File.separator + path
+          ? Application.getInstance().getSatelliteWebConfig().getBasePath() + File.separator + file
+          : Application.getInstance().getSatelliteWebConfig().getBasePath() + File.separator + path
               + File.separator + file;
 
       if (!(new File(fullPath).exists())) {

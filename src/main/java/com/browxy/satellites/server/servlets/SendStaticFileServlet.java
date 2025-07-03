@@ -33,9 +33,9 @@ public class SendStaticFileServlet extends HttpServlet {
     }
     try {
       String filePath = requestUri.startsWith("/assets")
-          ? Application.getInstance().getAmsatWebConfig().getStaticPath() + requestUri
-          : Application.getInstance().getAmsatWebConfig().getStaticPath() + File.separator
-              + Application.getInstance().getAmsatWebConfig().getStaticFile();
+          ? Application.getInstance().getSatelliteWebConfig().getStaticPath() + requestUri
+          : Application.getInstance().getSatelliteWebConfig().getStaticPath() + File.separator
+              + Application.getInstance().getSatelliteWebConfig().getStaticFile();
       File file = new File(filePath);
       String mimeType = MimeTypeUtil.getMimeTypeByFileName(file.getName());
       if (file.exists()) {
@@ -69,13 +69,13 @@ public class SendStaticFileServlet extends HttpServlet {
     Gson gson = new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
     try {
 
-      String path = Application.getInstance().getAmsatWebConfig().getBasePath() + File.separator
+      String path = Application.getInstance().getSatelliteWebConfig().getBasePath() + File.separator
           + "metadata" + File.separator + "project.json";
       String metadata = FileManager.readFile(path, "UTF-8");
       logger.info(metadata);
       projectConfig = gson.fromJson(metadata, ProjectConfig.class);
       projectConfig.setSocketPort(9191);
-      projectConfig.setEntryPoint(Application.getInstance().getAmsatWebConfig().getEntryPoint());
+      projectConfig.setEntryPoint(Application.getInstance().getSatelliteWebConfig().getEntryPoint());
       projectConfig.setCompilerContextService("http");
       projectConfig.setEmbedded(true);
 

@@ -30,7 +30,7 @@ public class GetAssetServlet extends HttpServlet {
     }
 
     String path =
-        Application.getInstance().getAmsatWebConfig().getBasePath() + File.separator + fileName;
+        Application.getInstance().getSatelliteWebConfig().getBasePath() + File.separator + fileName;
     File file = new File(path);
 
     if (!file.exists() || !file.isFile()) {

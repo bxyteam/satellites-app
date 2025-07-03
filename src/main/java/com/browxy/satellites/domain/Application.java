@@ -8,12 +8,12 @@ import com.browxy.satellites.util.JSONUtils;
 
 public class Application {
   private static Application instance;
-  private SatelliteGithubConfig amsatGithubConfig;
-  private SatelliteWebConfig amsatWebConfig;
+  private SatelliteGithubConfig satelliteGithubConfig;
+  private SatelliteWebConfig satelliteWebConfig;
 
   public Application() {
-    this.amsatGithubConfig = this.getGithubConfigFromEnv();
-    this.amsatWebConfig = this.getWebConfigFromJson();
+    this.satelliteGithubConfig = this.getGithubConfigFromEnv();
+    this.satelliteWebConfig = this.getWebConfigFromJson();
   }
 
   public static Application getInstance() {
@@ -27,16 +27,16 @@ public class Application {
     return instance;
   }
 
-  public SatelliteGithubConfig getAmsatGithubConfig() {
-    return amsatGithubConfig;
+  public SatelliteGithubConfig getSatelliteGithubConfig() {
+    return satelliteGithubConfig;
   }
 
-  public void setAmsatGithubConfig(SatelliteGithubConfig amsatGithubConfig) {
-    this.amsatGithubConfig = amsatGithubConfig;
+  public void setSatelliteGithubConfig(SatelliteGithubConfig satelliteGithubConfig) {
+    this.satelliteGithubConfig = satelliteGithubConfig;
   }
 
-  public SatelliteWebConfig getAmsatWebConfig() {
-    return amsatWebConfig;
+  public SatelliteWebConfig getSatelliteWebConfig() {
+    return satelliteWebConfig;
   }
 
   private SatelliteGithubConfig getGithubConfigFromEnv() {

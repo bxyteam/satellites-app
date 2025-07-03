@@ -24,11 +24,11 @@ public class AdminGithubServlet extends HttpServlet {
       throws ServletException, IOException {
     try {
       String token = req.getParameter("token");
-      if(!Application.getInstance().getAmsatWebConfig().getToken().equals(token)) {
+      if(!Application.getInstance().getSatelliteWebConfig().getToken().equals(token)) {
         resp.setContentType("text/html");
         resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "UNAUTHORIZED - Bad Credentials");
       }
-      String filePath =  Application.getInstance().getAmsatWebConfig().getStaticPath() + File.separator
+      String filePath =  Application.getInstance().getSatelliteWebConfig().getStaticPath() + File.separator
               + "adminGithub.html";
       File file = new File(filePath);
       String mimeType = MimeTypeUtil.getMimeTypeByFileName(file.getName());
@@ -54,7 +54,7 @@ public class AdminGithubServlet extends HttpServlet {
   private String buildHtmlMetadata(File file) throws IOException {
     String content = new String(Files.readAllBytes(file.toPath()));
     Gson gson = new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
-    String conf = gson.toJson(Application.getInstance().getAmsatGithubConfig());
+    String conf = gson.toJson(Application.getInstance().getSatelliteGithubConfig());
     return content.replace("%%GITHUB_DATA%%;", conf);
   }
 }

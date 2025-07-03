@@ -12,7 +12,7 @@ public class SatelliteGithubConfig {
      this.githubRepo = System.getenv("GITHUB_REPO");
      this.githubToken = System.getenv("GITHUB_TOKEN");
      this.localRepoPath = System.getenv("LOCAL_REPO_PATH");
-     this.downloadUrl = System.getenv("GITHUB_DOWNLOAD_URL");
+     this.downloadUrl = this.buildGithubDownloadUrl();
   }
   
   public String getGithubRepo() {
@@ -55,5 +55,17 @@ public class SatelliteGithubConfig {
     this.downloadUrl = downloadUrl;
   }
 
+  private String buildGithubDownloadUrl() {
+    if(this.githubOwner == null || this.githubOwner.trim().isEmpty()) {
+      return null;
+    }
+    if(this.githubRepo == null || this.githubRepo.trim().isEmpty()) {
+      return null;
+    }
+    return new StringBuilder("https://github.com/")
+      .append(this.githubOwner).append("/").append(this.githubRepo)
+      .append("/archive/refs/heads/main.zip").toString();
+   
+  }
 }
 

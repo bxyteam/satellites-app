@@ -38,7 +38,7 @@ public class GithubSaveRepoAdminConfServlet extends HttpServlet {
             response.getWriter().write(ResponseMessageUtil.getStatusMessage("Some fields are wrong!", 400));
             return;
           }
-          Application.getInstance().setAmsatGithubConfig(amsatGithubConfig);
+          Application.getInstance().setSatelliteGithubConfig(amsatGithubConfig);
           json.addProperty("statusCode", 200);
           json.addProperty("message", "Success!");
           response.setStatus(HttpServletResponse.SC_OK);
