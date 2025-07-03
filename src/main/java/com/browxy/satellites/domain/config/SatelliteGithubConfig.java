@@ -62,10 +62,8 @@ public class SatelliteGithubConfig {
     if(this.githubRepo == null || this.githubRepo.trim().isEmpty()) {
       return null;
     }
-    return new StringBuilder("https://github.com/")
-      .append(this.githubOwner).append("/").append(this.githubRepo)
-      .append("/archive/refs/heads/main.zip").toString();
-   
+    return String.format("https://github.com/%s/%s/archive/refs/heads/main.zip", this.githubOwner, this.githubRepo); 
+        
   }
 }
 
