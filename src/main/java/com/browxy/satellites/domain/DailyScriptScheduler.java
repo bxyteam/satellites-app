@@ -115,18 +115,38 @@ public class DailyScriptScheduler {
   }
 
   public void syncGithub() {
-
-    if (Application.getInstance().getSatelliteGithubConfig().getGithubToken() == null
-        || Application.getInstance().getSatelliteGithubConfig().getGithubToken().isEmpty()) {
-      logger.error("Please set GITHUB_TOKEN environment variable");
+    
+    if(!validateGithubCredentials()) {
       return;
     }
-
+    
     GitHubBranchSyncChecker checker =
         new GitHubBranchSyncChecker(Application.getInstance().getSatelliteGithubConfig());
 
     checker.checkAndSync();
 
+  }
+
+  private boolean validateGithubCredentials() {
+    if (Application.getInstance().getSatelliteGithubConfig().getGithubToken() == null
+        || Application.getInstance().getSatelliteGithubConfig().getGithubToken().isEmpty()) {
+      logger.error("Please set GITHUB_TOKEN environment variable");
+      return false;
+    }
+
+    if (Application.getInstance().getSatelliteGithubConfig().getGithubOwner() == null
+        || Application.getInstance().getSatelliteGithubConfig().getGithubOwner().isEmpty()) {
+      logger.error("Please set GITHUB_OWNER environment variable");
+      return false;
+    }
+ 
+    if (Application.getInstance().getSatelliteGithubConfig().getGithubRepo() == null
+        || Application.getInstance().getSatelliteGithubConfig().getGithubRepo().isEmpty()) {
+      logger.error("Please set GITHUB_REPO environment variable");
+      return false;
+    }
+    
+    return true;
   }
 
   private void executeScript(String scriptPath) throws IOException, InterruptedException {
