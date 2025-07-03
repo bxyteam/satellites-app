@@ -25,5 +25,16 @@ replay_pid*
 
 .env.dev
 .env.prod
+.env.local
+env.dev
+env.prod
+env.local
+
+src/main/resources/scripts/env.dev
+src/main/resources/scripts/env.local
+src/main/resources/scripts/env.prod
+src/main/resources/scripts/.env.dev
+src/main/resources/scripts/.env.local
+src/main/resources/scripts/.env.prod
 
 target/
