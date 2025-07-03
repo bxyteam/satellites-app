@@ -1,0 +1,15 @@
+services:
+  satellite:
+    image: docker-registry.local/browxy_satellite:latest
+    env_file:
+      - env.local
+    container_name: satellite
+    hostname: satellite
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    volumes:
+      - /var/compiler/satellite:/var/satellite
+    ulimits:
+      nproc: 524288
+      nofile: 524288

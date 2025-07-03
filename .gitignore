@@ -38,3 +38,4 @@ src/main/resources/scripts/.env.local
 src/main/resources/scripts/.env.prod
 
 target/
+
