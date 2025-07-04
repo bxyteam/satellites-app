@@ -21,8 +21,8 @@ public class GithubRepoDownloader {
     
     String script = 
         "set -e\n" +
-        "TMP_DIR=\"/var/compiler/satellite/data/tmp\"\n" +
-        "TARGET_DIR=\"/var/compiler/satellite/data\"\n" +
+        "TMP_DIR=\"/var/satellite/data/tmp\"\n" +
+        "TARGET_DIR=\"/var/satellite/data\"\n" +
         "ZIP_FILE=\"$TMP_DIR/main.zip\"\n" +
         "mkdir -p \"$TMP_DIR\"\n" +
         "wget -O \"$ZIP_FILE\" \"$GITHUB_DOWNLOAD_URL\"\n" +
@@ -36,7 +36,30 @@ public class GithubRepoDownloader {
         "    exit 1\n" +
         "fi\n" +
         "rm -f \"$ZIP_FILE\"\n" +
-        "echo \"Done: Folder 'github' is now in $TARGET_DIR\"\n";
+        "echo \"Done: Folder 'github' is now in $TARGET_DIR\"\n" +
+        "WEB_DIR=\"/var/satellite/data/web\"\n" + 
+        "GITHUB_DIR=\"/var/satellite/data/github\"\n" + 
+        "\n" + 
+        "# Copy templates if source directory exists and has files\n" + 
+        "if [ -d \"${GITHUB_DIR}/frontend/templates\" ] && [ \"$(ls -A ${GITHUB_DIR}/frontend/templates)\" ]; then\n" + 
+        "    cp ${GITHUB_DIR}/frontend/templates/* ${WEB_DIR}/templates\n" + 
+        "else\n" + 
+        "    echo \"Templates directory is missing or empty: ${GITHUB_DIR}/frontend/templates\"\n" + 
+        "fi\n" + 
+        "\n" + 
+        "# Copy satellite assets if source directory exists and has files\n" + 
+        "if [ -d \"${GITHUB_DIR}/frontend/sats\" ] && [ \"$(ls -A ${GITHUB_DIR}/frontend/sats)\" ]; then\n" + 
+        "    cp ${GITHUB_DIR}/frontend/sats/* ${WEB_DIR}/share/assets\n" + 
+        "else\n" + 
+        "    echo \"Sats directory is missing or empty: ${GITHUB_DIR}/frontend/sats\"\n" + 
+        "fi\n" + 
+        "\n" + 
+        "# Copy html assets if source directory exists and has files\n" + 
+        "if [ -d \"${GITHUB_DIR}/frontend/html\" ] && [ \"$(ls -A ${GITHUB_DIR}/frontend/html)\" ]; then\n" + 
+        "    cp ${GITHUB_DIR}/frontend/html/* ${WEB_DIR}/share/assets\n" + 
+        "else\n" + 
+        "    echo \"Sats directory is missing or empty: ${GITHUB_DIR}/frontend/html\"\n" + 
+        "fi\n";
 
  
     ProcessBuilder builder = new ProcessBuilder("bash", "-s");

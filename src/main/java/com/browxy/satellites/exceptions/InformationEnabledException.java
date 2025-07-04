@@ -44,6 +44,7 @@ public class InformationEnabledException extends ReportableException {
         return informationEnabledExceptions;
     }
     
+    @Override
     public String toString() {
         StringBuffer buf = new StringBuffer();
         if (informations.size() > 0) {
