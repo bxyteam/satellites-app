@@ -90,10 +90,7 @@ public class DailyScriptScheduler {
         Application.getInstance().getSatelliteGithubConfig().getLocalRepoPath()
             + "/scripts/copy_files.sh";
     try {
-      String spaceTrackIdentity = System.getenv("SPACE_TRACK_IDENTITY");
-      String spaceTrackPassword = System.getenv("SPACE_TRACK_PASSWORD");
-      if(spaceTrackIdentity != null && !spaceTrackIdentity.isEmpty() 
-          && spaceTrackPassword != null && !spaceTrackPassword.isEmpty()) {
+      if(validateSpacetrackCredentials()) {
         executeScript(scriptKepsUpdaterFilePath);
       }
       syncGithub();
@@ -108,7 +105,9 @@ public class DailyScriptScheduler {
         Application.getInstance().getSatelliteGithubConfig().getLocalRepoPath()
             + "/scripts/run_pasos_updater.sh";
     try {
-      executeScript(scriptPasosUpdaterFilePath);
+      if(validateSpacetrackCredentials()) {
+        executeScript(scriptPasosUpdaterFilePath);
+      }
     } catch (Exception e) {
       logger.error("Error executing script: " + scriptPasosUpdaterFilePath, e);
     }
@@ -149,6 +148,14 @@ public class DailyScriptScheduler {
     return true;
   }
 
+  private boolean validateSpacetrackCredentials() {
+      String spaceTrackIdentity = System.getenv("SPACE_TRACK_IDENTITY");
+      String spaceTrackPassword = System.getenv("SPACE_TRACK_PASSWORD");
+      return spaceTrackIdentity != null && !spaceTrackIdentity.isEmpty() 
+          && spaceTrackPassword != null && !spaceTrackPassword.isEmpty();
+      
+  }
+  
   private void executeScript(String scriptPath) throws IOException, InterruptedException {
     ProcessBuilder pb = new ProcessBuilder("bash", scriptPath);
     pb.redirectErrorStream(true);

@@ -13,19 +13,19 @@ public class GithubRepoDownloader {
   private static Logger logger = LoggerFactory.getLogger(GithubRepoDownloader.class);
   
   public void download() throws IOException, InterruptedException  {
-    
-    if (Application.getInstance().getSatelliteGithubConfig().getDownloadUrl() == null
-        || Application.getInstance().getSatelliteGithubConfig().getDownloadUrl().isEmpty()) {
-      return;
+    String downloadGithubUrl = Application.getInstance().getSatelliteGithubConfig().getDownloadUrl();
+    if (downloadGithubUrl == null || downloadGithubUrl.isEmpty()) {
+        return;
     }
-    
-    String script = 
+
+    String script = String.format(
         "set -e\n" +
         "TMP_DIR=\"/var/satellite/data/tmp\"\n" +
+        "chmod -R ugo+rwx ${TMP_DIR}\n" +
         "TARGET_DIR=\"/var/satellite/data\"\n" +
         "ZIP_FILE=\"$TMP_DIR/main.zip\"\n" +
         "mkdir -p \"$TMP_DIR\"\n" +
-        "wget -O \"$ZIP_FILE\" \"$GITHUB_DOWNLOAD_URL\"\n" +
+        "wget -O \"$ZIP_FILE\" \"%s\"\n" +
         "unzip -o \"$ZIP_FILE\" -d \"$TMP_DIR\"\n" +
         "UNZIPPED_DIR=$(find \"$TMP_DIR\" -maxdepth 1 -type d -name \"*-main\")\n" +
         "if [ -d \"$UNZIPPED_DIR\" ]; then\n" +
@@ -37,31 +37,34 @@ public class GithubRepoDownloader {
         "fi\n" +
         "rm -f \"$ZIP_FILE\"\n" +
         "echo \"Done: Folder 'github' is now in $TARGET_DIR\"\n" +
-        "WEB_DIR=\"/var/satellite/data/web\"\n" + 
-        "GITHUB_DIR=\"/var/satellite/data/github\"\n" + 
-        "\n" + 
-        "# Copy templates if source directory exists and has files\n" + 
-        "if [ -d \"${GITHUB_DIR}/frontend/templates\" ] && [ \"$(ls -A ${GITHUB_DIR}/frontend/templates)\" ]; then\n" + 
-        "    cp ${GITHUB_DIR}/frontend/templates/* ${WEB_DIR}/templates\n" + 
-        "else\n" + 
-        "    echo \"Templates directory is missing or empty: ${GITHUB_DIR}/frontend/templates\"\n" + 
-        "fi\n" + 
-        "\n" + 
-        "# Copy satellite assets if source directory exists and has files\n" + 
-        "if [ -d \"${GITHUB_DIR}/frontend/sats\" ] && [ \"$(ls -A ${GITHUB_DIR}/frontend/sats)\" ]; then\n" + 
-        "    cp ${GITHUB_DIR}/frontend/sats/* ${WEB_DIR}/share/assets\n" + 
-        "else\n" + 
-        "    echo \"Sats directory is missing or empty: ${GITHUB_DIR}/frontend/sats\"\n" + 
-        "fi\n" + 
-        "\n" + 
-        "# Copy html assets if source directory exists and has files\n" + 
-        "if [ -d \"${GITHUB_DIR}/frontend/html\" ] && [ \"$(ls -A ${GITHUB_DIR}/frontend/html)\" ]; then\n" + 
-        "    cp ${GITHUB_DIR}/frontend/html/* ${WEB_DIR}/share/assets\n" + 
-        "else\n" + 
-        "    echo \"Sats directory is missing or empty: ${GITHUB_DIR}/frontend/html\"\n" + 
-        "fi\n";
+        "\n" +
+        "WEB_DIR=\"/var/satellite/data/web\"\n" +
+        "GITHUB_DIR=\"/var/satellite/data/github\"\n" +
+        "chmod -R ugo+rwx ${GITHUB_DIR}\n" +
+        "\n" +
+        "# Copy templates if source directory exists and has files\n" +
+        "if [ -d \"${GITHUB_DIR}/frontend/templates\" ] && [ \"$(ls -A ${GITHUB_DIR}/frontend/templates)\" ]; then\n" +
+        "    cp ${GITHUB_DIR}/frontend/templates/* ${WEB_DIR}/templates\n" +
+        "else\n" +
+        "    echo \"Templates directory is missing or empty: ${GITHUB_DIR}/frontend/templates\"\n" +
+        "fi\n" +
+        "\n" +
+        "# Copy satellite assets if source directory exists and has files\n" +
+        "if [ -d \"${GITHUB_DIR}/frontend/sats\" ] && [ \"$(ls -A ${GITHUB_DIR}/frontend/sats)\" ]; then\n" +
+        "    cp ${GITHUB_DIR}/frontend/sats/* ${WEB_DIR}/share/assets\n" +
+        "else\n" +
+        "    echo \"Sats directory is missing or empty: ${GITHUB_DIR}/frontend/sats\"\n" +
+        "fi\n" +
+        "\n" +
+        "# Copy html assets if source directory exists and has files\n" +
+        "if [ -d \"${GITHUB_DIR}/frontend/html\" ] && [ \"$(ls -A ${GITHUB_DIR}/frontend/html)\" ]; then\n" +
+        "    cp ${GITHUB_DIR}/frontend/html/* ${WEB_DIR}/share/assets\n" +
+        "else\n" +
+        "    echo \"HTML directory is missing or empty: ${GITHUB_DIR}/frontend/html\"\n" +
+        "fi\n",
+        downloadGithubUrl
+    );
 
- 
     ProcessBuilder builder = new ProcessBuilder("bash", "-s");
     builder.redirectErrorStream(true); 
     
