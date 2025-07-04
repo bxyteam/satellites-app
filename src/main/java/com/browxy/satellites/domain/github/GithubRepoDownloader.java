@@ -21,26 +21,25 @@ public class GithubRepoDownloader {
     String script = String.format(
         "set -e\n" +
         "TMP_DIR=\"/var/satellite/data/tmp\"\n" +
-        "chmod -R ugo+rwx ${TMP_DIR}\n" +
         "TARGET_DIR=\"/var/satellite/data\"\n" +
+        "WEB_DIR=\"/var/satellite/data/web\"\n" +
+        "GITHUB_DIR=\"/var/satellite/data/github\"\n" +
         "ZIP_FILE=\"$TMP_DIR/main.zip\"\n" +
         "mkdir -p \"$TMP_DIR\"\n" +
+        "chmod -R ugo+rwx ${TMP_DIR}\n" +
         "wget -O \"$ZIP_FILE\" \"%s\"\n" +
         "unzip -o \"$ZIP_FILE\" -d \"$TMP_DIR\"\n" +
         "UNZIPPED_DIR=$(find \"$TMP_DIR\" -maxdepth 1 -type d -name \"*-main\")\n" +
         "if [ -d \"$UNZIPPED_DIR\" ]; then\n" +
         "    mv \"$UNZIPPED_DIR\" \"$TMP_DIR/github\"\n" +
         "    mv \"$TMP_DIR/github\" \"$TARGET_DIR/\"\n" +
+        "    chmod -R ugo+rwx ${GITHUB_DIR}\n" +
         "else\n" +
         "    echo \"Error: Unzipped directory not found.\" >&2\n" +
         "    exit 1\n" +
         "fi\n" +
         "rm -f \"$ZIP_FILE\"\n" +
         "echo \"Done: Folder 'github' is now in $TARGET_DIR\"\n" +
-        "\n" +
-        "WEB_DIR=\"/var/satellite/data/web\"\n" +
-        "GITHUB_DIR=\"/var/satellite/data/github\"\n" +
-        "chmod -R ugo+rwx ${GITHUB_DIR}\n" +
         "\n" +
         "# Copy templates if source directory exists and has files\n" +
         "if [ -d \"${GITHUB_DIR}/frontend/templates\" ] && [ \"$(ls -A ${GITHUB_DIR}/frontend/templates)\" ]; then\n" +
