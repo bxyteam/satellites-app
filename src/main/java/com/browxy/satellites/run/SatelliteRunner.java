@@ -27,9 +27,7 @@ public class SatelliteRunner {
         ConfigResource.Type.Resource, "resource.template.properties", true, "UTF-8"));
     Config.getInstance().addConfigResource(new ConfigResource("compilerProduction",
         ConfigResource.Type.Resource, resourceFile, true, "UTF-8"));
-//    updateLog4jConfiguration(SatelliteRunner.class
-//        .getClassLoader()
-//        .getResource("logback." + environment + ".xml").getFile());
+
     updateLog4jConfiguration("logback." + environment + ".xml");
    
     new UpdateKepsManager();
@@ -74,23 +72,5 @@ public class SatelliteRunner {
     StatusPrinter.printInCaseOfErrorsOrWarnings(loggerContext);
 }
 
-//  public static void updateLog4jConfiguration(String logFile) {
-//    LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-//    URL url;
-//    try {
-//      url = new File(logFile).toURI().toURL();
-//    } catch (MalformedURLException e) {
-//      throw new RuntimeException(e);
-//    }
-//    try {
-//      JoranConfigurator configurator = new JoranConfigurator();
-//      configurator.setContext(loggerContext);
-//      loggerContext.reset();
-//      configurator.doConfigure(url);
-//    } catch (JoranException je) {
-//      // StatusPrinter will handle this
-//    }
-//    StatusPrinter.printInCaseOfErrorsOrWarnings(loggerContext);
-//  }
 
 }

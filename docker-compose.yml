@@ -3,7 +3,7 @@ version: '2'
 services:
 
   satellite:
-    image: docker-registry.beta.browxy.com/browxy_satellite:latest
+    image: docker-registry.beta.browxy.com/browxy_satellite:1.0
     env_file:
       - env.prod
     container_name: satellite

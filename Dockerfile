@@ -1,10 +1,10 @@
-FROM %%DOCKER_REGISTRY%%/browxy_compiler_base:latest
+FROM docker-registry.beta.browxy.com/browxy_compiler_base:latest
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install dependencies
 RUN apt-get update && \
-    apt-get install -y sudo dosbox xvfb x11-utils tar gzip xz-utils openjdk-8-jdk locales cron git unzip && \
+    apt-get install -y dosbox xvfb x11-utils tar gzip xz-utils openjdk-8-jdk locales cron git unzip && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
