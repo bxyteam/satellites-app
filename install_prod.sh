@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./install.sh Dockerfile docker-registry.beta.browxy.com docker-compose.yml
+./install_browxy.sh Dockerfile docker-registry.beta.browxy.com docker-compose.yml
